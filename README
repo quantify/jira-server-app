@@ -1,11 +1,30 @@
-You have successfully created an Atlassian Plugin!
+# jira-server-app
 
-Here are the SDK commands you'll use immediately:
+Simple Jira ServerPlugin 
 
-* atlas-run   -- installs this plugin into the product and starts it on localhost
-* atlas-debug -- same as atlas-run, but allows a debugger to attach at port 5005
-* atlas-help  -- prints description for all commands in the SDK
+## Objective 
 
-Full documentation is always available at:
+To create a Jira Server plugin with minimum functionality
 
-https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugin+SDK
+## Required functionality
+
+Upon new installation of the plugin 
+  * create a unique ID
+  * persist it so that it can be used in other components
+  * make an HTTP request to send it to the external service
+  * erase persisted unique ID upon plugin uninstallation
+  
+## Built With
+
+* [Maven](https://maven.apache.org/) - Dependency Management
+* [Maven](https://maven.apache.org/) - Dependency Management
+
+## References
+
+* [atlassianjdk](https://developer.atlassian.com/server/framework/atlassian-sdk/set-up-the-atlassian-plugin-sdk-
+and-build-a-project/) - Hello World tutorial for a Jira plugin
+* [SAL](
+https://developer.atlassian.com/server/framework/atlassian-sdk/storing-plugin-settings/) - Shared Access Layer
+
+
+
