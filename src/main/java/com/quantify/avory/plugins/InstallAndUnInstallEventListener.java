@@ -19,9 +19,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+// TODO: Refactor class. HttpRequests and UUID persistence should happen outside an event listener
+// FIXME: logger is not catching logs in this class, using System.out.print as a naive alternative
+
 @Component
 public class InstallAndUnInstallEventListener implements InitializingBean, DisposableBean {
+
     private static final Logger log = LoggerFactory.getLogger(InstallAndUnInstallEventListener.class);
+
+    // TODO: Remove hardcoded values from testing
     private final static String PLUGIN_KEY = "com.quantify.avory.plugins.limited-plugin";
     private final static String postmanURL = "https://postman-echo.com/post";
 
@@ -39,22 +45,12 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
         this.pluginSettingsFactory = pluginSettingsFactory;
     }
 
-    /**
-     * Called when the plugin has been enabled.
-     *
-     * @throws Exception
-     */
     @Override
     public void afterPropertiesSet() throws Exception {
         log.info("Enabling plugin");
         eventPublisher.register(this);
     }
 
-    /**
-     * Called when the plugin is being disabled or removed.
-     *
-     * @throws Exception
-     */
     @Override
     public void destroy() throws Exception {
         log.info("Disabling plugin");
@@ -62,26 +58,30 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
     }
 
     /**
-     * Called after plugins finish initializing.
-     * Starts first installation routine.
+     * Begins "enable/installation" routine of plugin.
+     * Routine is as follows:
+     *  1. Generate UUID
+     *  2. Persist UUID to Global Settings for use in other components
+     *  3. Send an HTTP request to external service
+     *
+     *  FIXME: Routine executes on enable and not just on install
      */
     @EventListener
     public void onPluginInstall(final PluginEnabledEvent pluginEnabledEvent) {
         String startUpPluginKey = pluginEnabledEvent.getPlugin().getKey();
         if (PLUGIN_KEY.equals(startUpPluginKey)) {
+
             String uniqueID = UUID.randomUUID().toString();
             System.out.println("UUID: " + uniqueID);
 
-            persistData(uniqueID);
-            sendIDToService(uniqueID);
+            persistPluginData(uniqueID);
+            sendIDToExternalService(uniqueID);
         }
 
     }
 
-    /**
-     * Sends generated ID to an external service
-     */
-    private void sendIDToService(String id) {
+    //TODO: Refactor into another class
+    private void sendIDToExternalService(String id) {
 
         HttpResponse<JsonNode> response = Unirest.post(postmanURL)
                 .body("UUID: " + id)
@@ -95,15 +95,11 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
 
     }
 
-    /**
-     * Persists the generated ID so it can be used in other componenets
-     */
-    private void persistData(String id) {
+    //TODO: Refactor into another class
+    private void persistPluginData(String id) {
 
         PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
         globalSettings.put("uuid", id);
-
-        System.out.println("persistData here");
     }
 }
 
