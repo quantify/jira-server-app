@@ -2,6 +2,7 @@ package com.quantify.avory.plugins;
 
 import com.atlassian.event.api.EventListener;
 import com.atlassian.event.api.EventPublisher;
+import com.atlassian.plugin.event.events.PluginDisabledEvent;
 import com.atlassian.plugin.event.events.PluginEnabledEvent;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
@@ -29,6 +30,7 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
 
     // TODO: Remove hardcoded values from testing
     private final static String PLUGIN_KEY = "com.quantify.avory.plugins.limited-plugin";
+    private final static String UUID_KEY = "uuid";
     private final static String postmanURL = "https://postman-echo.com/post";
 
 
@@ -55,6 +57,7 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
     public void destroy() throws Exception {
         log.info("Disabling plugin");
         eventPublisher.unregister(this);
+
     }
 
     /**
@@ -68,14 +71,21 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
      */
     @EventListener
     public void onPluginInstall(final PluginEnabledEvent pluginEnabledEvent) {
+        PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
         String startUpPluginKey = pluginEnabledEvent.getPlugin().getKey();
-        if (PLUGIN_KEY.equals(startUpPluginKey)) {
+
+        // IF global settings does not have a UUID generate and persist one
+        if (PLUGIN_KEY.equals(startUpPluginKey) && globalSettings.get(UUID_KEY) == null) {
 
             String uniqueID = UUID.randomUUID().toString();
             System.out.println("UUID: " + uniqueID);
 
             persistPluginData(uniqueID);
             sendIDToExternalService(uniqueID);
+
+        } else if(PLUGIN_KEY.equals(startUpPluginKey)){
+            System.out.println("Already has uuid: " + globalSettings.get(UUID_KEY));
+
         }
 
     }
@@ -99,7 +109,7 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
     private void persistPluginData(String id) {
 
         PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
-        globalSettings.put("uuid", id);
+        globalSettings.put(UUID_KEY, id);
     }
 }
 
