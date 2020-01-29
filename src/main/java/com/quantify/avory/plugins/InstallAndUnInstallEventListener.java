@@ -2,12 +2,8 @@ package com.quantify.avory.plugins;
 
 import com.atlassian.event.api.EventListener;
 import com.atlassian.event.api.EventPublisher;
-import com.atlassian.plugin.event.events.PluginDisabledEvent;
 import com.atlassian.plugin.event.events.PluginEnabledEvent;
-import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
-import com.atlassian.sal.api.pluginsettings.PluginSettings;
-import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
@@ -30,21 +26,19 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
 
     // TODO: Remove hardcoded values from testing
     private final static String PLUGIN_KEY = "com.quantify.avory.plugins.limited-plugin";
-    private final static String UUID_KEY = "uuid";
     private final static String postmanURL = "https://postman-echo.com/post";
 
 
     @JiraImport
     private final EventPublisher eventPublisher;
 
-    @ComponentImport
-    private final PluginSettingsFactory pluginSettingsFactory;
+    private final PluginDataManager pluginDataManager;
 
 
     @Autowired
-    public InstallAndUnInstallEventListener(EventPublisher eventPublisher, PluginSettingsFactory pluginSettingsFactory) {
+    public InstallAndUnInstallEventListener(EventPublisher eventPublisher, PluginDataManager pluginDataManager) {
         this.eventPublisher = eventPublisher;
-        this.pluginSettingsFactory = pluginSettingsFactory;
+        this.pluginDataManager = pluginDataManager;
     }
 
     @Override
@@ -70,21 +64,19 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
      *  FIXME: Routine executes on enable and not just on install
      */
     @EventListener
-    public void onPluginInstall(final PluginEnabledEvent pluginEnabledEvent) {
-        PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
-        String startUpPluginKey = pluginEnabledEvent.getPlugin().getKey();
+    public void onPluginInstall(final PluginEnabledEvent event) {
 
-        // IF global settings does not have a UUID generate and persist one
-        if (PLUGIN_KEY.equals(startUpPluginKey) && globalSettings.get(UUID_KEY) == null) {
+        // if  global settings does not have a UUID,  generate and persist one
+        if (isCurrentPlugin(event) &&  pluginDataManager.getUUID() == null) {
 
             String uniqueID = UUID.randomUUID().toString();
             System.out.println("UUID: " + uniqueID);
 
-            persistPluginData(uniqueID);
+            pluginDataManager.setUUID(uniqueID); // persist id to global settings
             sendIDToExternalService(uniqueID);
 
-        } else if(PLUGIN_KEY.equals(startUpPluginKey)){
-            System.out.println("Already has uuid: " + globalSettings.get(UUID_KEY));
+        } else if(isCurrentPlugin(event)){
+            System.out.println("Already has uuid: " + pluginDataManager.getUUID());
 
         }
 
@@ -105,11 +97,15 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
 
     }
 
-    //TODO: Refactor into another class
-    private void persistPluginData(String id) {
-
-        PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
-        globalSettings.put(UUID_KEY, id);
+    /**
+     * Helper function to verify that that plugin event is this plugin
+     *
+     * Otherwise this event will fire for EVERY plugin on jira
+     */
+    private Boolean isCurrentPlugin(PluginEnabledEvent event){
+        String startUpPluginKey = event.getPlugin().getKey();
+        return (PLUGIN_KEY.equals(startUpPluginKey));
     }
+
 }
 
