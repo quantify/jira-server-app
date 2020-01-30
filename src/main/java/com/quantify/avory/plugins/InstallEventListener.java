@@ -16,13 +16,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-// TODO: Refactor class. HttpRequests and UUID persistence should happen outside an event listener
 // FIXME: logger is not catching logs in this class, using System.out.print as a naive alternative
 
 @Component
-public class InstallAndUnInstallEventListener implements InitializingBean, DisposableBean {
+public class InstallEventListener implements InitializingBean, DisposableBean {
 
-    private static final Logger log = LoggerFactory.getLogger(InstallAndUnInstallEventListener.class);
+    private static final Logger log = LoggerFactory.getLogger(InstallEventListener.class);
 
     // TODO: Remove hardcoded values from testing
     private final static String PLUGIN_KEY = "com.quantify.avory.plugins.limited-plugin";
@@ -31,12 +30,11 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
 
     @JiraImport
     private final EventPublisher eventPublisher;
-
     private final PluginDataManager pluginDataManager;
 
 
     @Autowired
-    public InstallAndUnInstallEventListener(EventPublisher eventPublisher, PluginDataManager pluginDataManager) {
+    public InstallEventListener(EventPublisher eventPublisher, PluginDataManager pluginDataManager) {
         this.eventPublisher = eventPublisher;
         this.pluginDataManager = pluginDataManager;
     }
@@ -61,22 +59,21 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
      *  2. Persist UUID to Global Settings for use in other components
      *  3. Send an HTTP request to external service
      *
-     *  FIXME: Routine executes on enable and not just on install
      */
     @EventListener
     public void onPluginInstall(final PluginEnabledEvent event) {
 
-        // if  global settings does not have a UUID,  generate and persist one
+        // if global settings does not have a UUID,  generate and persist one
         if (isCurrentPlugin(event) &&  pluginDataManager.getUUID() == null) {
 
             String uniqueID = UUID.randomUUID().toString();
-            System.out.println("UUID: " + uniqueID);
+            log.debug("UUID: " + uniqueID);
 
             pluginDataManager.setUUID(uniqueID); // persist id to global settings
             sendIDToExternalService(uniqueID);
 
         } else if(isCurrentPlugin(event)){
-            System.out.println("Already has uuid: " + pluginDataManager.getUUID());
+            log.debug("Already has uuid: " + pluginDataManager.getUUID());
 
         }
 
@@ -90,9 +87,9 @@ public class InstallAndUnInstallEventListener implements InitializingBean, Dispo
                 .asEmpty();
 
         if (response.getStatus() == 200) {
-            System.out.println("Success!! Status Code: " + response.getStatusText());
+            log.debug("Success!! Status Code: " + response.getStatusText());
         } else {
-            System.out.println("Failure!! Status Code: " + response.getStatusText());
+            log.error("Failure!! Status Code: " + response.getStatusText());
         }
 
     }
