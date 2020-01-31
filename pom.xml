@@ -21,6 +21,19 @@
     <dependencies>
 
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java</artifactId>
             <version>3.4.00</version>
@@ -39,16 +52,7 @@
             <version>${jira.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Add dependency on jira-core if you want access to JIRA implementation classes as well as the sanctioned API. -->
-        <!-- This is not normally recommended, but may be required eg when migrating a plugin originally developed against JIRA 4.x -->
-        <!--
-        <dependency>
-            <groupId>com.atlassian.jira</groupId>
-            <artifactId>jira-core</artifactId>
-            <version>${jira.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -103,16 +107,6 @@
             <version>2.2.2-atlassian-1</version>
         </dependency>
 
-        <!-- Uncomment to use TestKit in your project. Details at https://bitbucket.org/atlassian/jira-testkit -->
-        <!-- You can read more about TestKit at https://developer.atlassian.com/display/JIRADEV/Plugin+Tutorial+-+Smarter+integration+testing+with+TestKit -->
-        <!--
-        <dependency>
-            <groupId>com.atlassian.jira.tests</groupId>
-            <artifactId>jira-testkit-client</artifactId>
-            <version>${testkit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        -->
     </dependencies>
 
     <build>

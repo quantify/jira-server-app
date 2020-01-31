@@ -4,9 +4,6 @@ import com.atlassian.event.api.EventListener;
 import com.atlassian.event.api.EventPublisher;
 import com.atlassian.plugin.event.events.PluginEnabledEvent;
 import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
-import kong.unirest.HttpResponse;
-import kong.unirest.JsonNode;
-import kong.unirest.Unirest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -16,16 +13,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-// FIXME: logger is not catching logs in this class, using System.out.print as a naive alternative
-
 @Component
 public class InstallEventListener implements InitializingBean, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(InstallEventListener.class);
-
-    // TODO: Remove hardcoded values from testing
     private final static String PLUGIN_KEY = "com.quantify.avory.plugins.limited-plugin";
-    private final static String postmanURL = "https://postman-echo.com/post";
 
 
     @JiraImport
@@ -49,7 +41,6 @@ public class InstallEventListener implements InitializingBean, DisposableBean {
     public void destroy() throws Exception {
         log.info("Disabling plugin");
         eventPublisher.unregister(this);
-
     }
 
     /**
@@ -59,6 +50,9 @@ public class InstallEventListener implements InitializingBean, DisposableBean {
      *  2. Persist UUID to Global Settings for use in other components
      *  3. Send an HTTP request to external service
      *
+     * Checks if a generated UUID already exists in SAL
+     * If not, it generates and persists one
+     *
      */
     @EventListener
     public void onPluginInstall(final PluginEnabledEvent event) {
@@ -66,30 +60,15 @@ public class InstallEventListener implements InitializingBean, DisposableBean {
         // if global settings does not have a UUID,  generate and persist one
         if (isCurrentPlugin(event) &&  pluginDataManager.getUUID() == null) {
 
+            log.debug("First Install Routine Started");
             String uniqueID = UUID.randomUUID().toString();
-            log.debug("UUID: " + uniqueID);
-
+            log.debug("Newly Generated UUID: " + uniqueID);
             pluginDataManager.setUUID(uniqueID); // persist id to global settings
-            sendIDToExternalService(uniqueID);
+            HttpUtil.sendToExternalService("UUID",uniqueID);
 
         } else if(isCurrentPlugin(event)){
-            log.debug("Already has uuid: " + pluginDataManager.getUUID());
+            log.debug("UUID Already in Global Settings: " + pluginDataManager.getUUID());
 
-        }
-
-    }
-
-    //TODO: Refactor into another class
-    private void sendIDToExternalService(String id) {
-
-        HttpResponse<JsonNode> response = Unirest.post(postmanURL)
-                .body("UUID: " + id)
-                .asEmpty();
-
-        if (response.getStatus() == 200) {
-            log.debug("Success!! Status Code: " + response.getStatusText());
-        } else {
-            log.error("Failure!! Status Code: " + response.getStatusText());
         }
 
     }

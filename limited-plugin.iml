@@ -17,6 +17,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: com.konghq:unirest-java:standalone:3.4.00" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.9" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.11" level="project" />
@@ -112,7 +115,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: commons-io:commons-io:2.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: commons-httpclient:commons-httpclient:3.1-atlassian-2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: log4j:log4j:1.2.16" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.7.9" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.atlassian.profiling:atlassian-profiling:1.9" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.atlassian.scheduler:atlassian-scheduler-api:1.7.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.atlassian.analytics:analytics-api:5.6.2" level="project" />
