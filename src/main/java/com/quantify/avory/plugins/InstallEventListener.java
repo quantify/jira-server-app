@@ -46,27 +46,26 @@ public class InstallEventListener implements InitializingBean, DisposableBean {
     /**
      * Begins "enable/installation" routine of plugin.
      * Routine is as follows:
-     *  1. Generate UUID
-     *  2. Persist UUID to Global Settings for use in other components
-     *  3. Send an HTTP request to external service
+     * 1. Generate UUID
+     * 2. Persist UUID to Global Settings for use in other components
+     * 3. Send an HTTP request to external service
      *
      * Checks if a generated UUID already exists in SAL
      * If not, it generates and persists one
-     *
      */
     @EventListener
     public void onPluginInstall(final PluginEnabledEvent event) {
 
         // if global settings does not have a UUID,  generate and persist one
-        if (isCurrentPlugin(event) &&  pluginDataManager.getUUID() == null) {
+        if (isCurrentPlugin(event) && pluginDataManager.getUUID() == null) {
 
             log.debug("First Install Routine Started");
             String uniqueID = UUID.randomUUID().toString();
             log.debug("Newly Generated UUID: " + uniqueID);
             pluginDataManager.setUUID(uniqueID); // persist id to global settings
-            HttpUtil.sendToExternalService("UUID",uniqueID);
+            HttpUtil.sendToExternalService("UUID", uniqueID);
 
-        } else if(isCurrentPlugin(event)){
+        } else if (isCurrentPlugin(event)) {
             log.debug("UUID Already in Global Settings: " + pluginDataManager.getUUID());
 
         }
@@ -78,7 +77,7 @@ public class InstallEventListener implements InitializingBean, DisposableBean {
      *
      * Otherwise this event will fire for EVERY plugin on jira
      */
-    private Boolean isCurrentPlugin(PluginEnabledEvent event){
+    private Boolean isCurrentPlugin(PluginEnabledEvent event) {
         String startUpPluginKey = event.getPlugin().getKey();
         return (PLUGIN_KEY.equals(startUpPluginKey));
     }

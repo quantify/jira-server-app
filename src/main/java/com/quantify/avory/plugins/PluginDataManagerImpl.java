@@ -20,15 +20,15 @@ public class PluginDataManagerImpl implements PluginDataManager {
     }
 
     @Override
-    public void setUUID(String uuid) {
-        PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
-        globalSettings.put(UUID_KEY, uuid);
-    }
-
-    @Override
     public String getUUID() {
         PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
         return (String) globalSettings.get(UUID_KEY);
+    }
+
+    @Override
+    public void setUUID(String uuid) {
+        PluginSettings globalSettings = pluginSettingsFactory.createGlobalSettings();
+        globalSettings.put(UUID_KEY, uuid);
     }
 
     @Override

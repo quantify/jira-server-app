@@ -1,6 +1,10 @@
 package com.quantify.avory.plugins;
 
-import kong.unirest.*;
+import kong.unirest.Callback;
+import kong.unirest.HttpResponse;
+import kong.unirest.JsonNode;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,28 +21,28 @@ public class HttpUtil {
     /**
      * Async HTTP Post request to send message to service
      */
-    public static void sendToExternalService(String messageHeader, String messageBody){
+    public static void sendToExternalService(String messageHeader, String messageBody) {
 
         CompletableFuture<HttpResponse<JsonNode>> future = Unirest.post(EXTERNAL_SERVICE)
-                    .header("accept", "application/json")
-                    .field(messageHeader, messageBody)
-                    .asJsonAsync(new Callback<JsonNode>() {
+                .header("accept", "application/json")
+                .field(messageHeader, messageBody)
+                .asJsonAsync(new Callback<JsonNode>() {
 
-                        @Override
-                        public void failed(UnirestException e) {
-                            log.error("POST Failure! UUID: " + messageBody + " not sent!");
-                        }
+                    @Override
+                    public void failed(UnirestException e) {
+                        log.error("POST Failure! UUID: " + messageBody + " not sent!");
+                    }
 
-                        @Override
-                        public void completed(HttpResponse<JsonNode> httpResponse) {
-                            log.debug("POST Success! UUID: " + messageBody + " sent!");
-                        }
+                    @Override
+                    public void completed(HttpResponse<JsonNode> httpResponse) {
+                        log.debug("POST Success! UUID: " + messageBody + " sent!");
+                    }
 
-                        @Override
-                        public void cancelled() {
-                            log.debug("POST Cancelled!! UUID: " + messageBody + " not sent!");
-                        }
+                    @Override
+                    public void cancelled() {
+                        log.debug("POST Cancelled!! UUID: " + messageBody + " not sent!");
+                    }
 
-                    });
+                });
     }
 }
